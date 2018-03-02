@@ -14,7 +14,7 @@ class CustomMap
 
     public static function parseToPoints($locations){
         $points = array();
-        if(count($locations > 0)){
+        if(count($locations) > 0){
             foreach($locations as $location){
                 $points[] = $location->latitud.','.$location->longitud;
             }
