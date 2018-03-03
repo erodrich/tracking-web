@@ -41,9 +41,16 @@
     </div>
 </div>
 <script>
-$('#datepicker').datepicker({
-    dateFormat: 'yy-mm-dd',
-}).onChange(window.open("www.google.com"));
+
+$("#datepicker").datepicker({
+      dateFormat: "yy-mm-dd",
+      onSelect: function(dateText) {
+        $(this).change();
+      }
+    })
+    .change(function() {
+      window.location.href =  this.value;
+    });
 
 </script>
 @endsection

@@ -7,10 +7,12 @@ use App\Utils\CustomMap;
 use Illuminate\Http\Request;
 use FarhanWazir\GoogleMaps\GMaps;
 use App\Http\Controllers\HttpRequestsController;
+use App\Http\Controllers\MapController;
 
 class DashboardController extends Controller
 {
-    protected $gmap;
+    //protected $gmap;
+    protected $mapController;
     /**
      * Create a new controller instance.
      *
@@ -19,7 +21,9 @@ class DashboardController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
-        $this->gmap = new GMaps;
+        //$this->gmap = new GMaps;
+        $this->mapController = new MapController;
+        
     }
 
     /**
@@ -41,15 +45,25 @@ class DashboardController extends Controller
             for($i = 0; $i < count($locations); $i++){
                 if(!empty($locations[$i])){
                     $markers[$i]['position'] = $locations[$i]->latitud.','.$locations[$i]->longitud;
-                    $markers[$i]['infowindow_content'] = $user->devices[$i]->alias.'<p>'.$user->devices[$i]->phone.'</p>';
-                    $this->gmap->add_marker($markers[$i]);
+                    $markers[$i]['infowindow_content'] = '<h3>'.$user->devices[$i]->alias.'</h3>'
+                                                        .'<ul>'
+                                                        .'<li>Telefono: '.$user->devices[$i]->phone.'</li>'
+                                                        .'<li>Fecha: '.$locations[$i]->fecha.'</li>'
+                                                        .'<li>Hora: '.$locations[$i]->hora.'</li>'
+                                                        .'</ul>'
+                                                        ;                                                        ;
+                    $this->mapController->add_marker($markers[$i]);
                 }
             }
         }
 
-        $this->gmap = CustomMap::setControls($this->gmap);
-        $this->gmap->initialize(CustomMap::CONFIG);
-        $map = $this->gmap->create_map();
+        //$this->gmap = CustomMap::setControls($this->gmap);
+        //$this->gmap->initialize(CustomMap::CONFIG);
+        $center = CustomMap::getCenter($locations);
+        $this->mapController->setConfig('center', $center);
+        $this->mapController->setConfig('zoom', '16');
+        $this->mapController->cInitialize();
+        $map = $this->mapController->create_map();
         
         
         $data = [

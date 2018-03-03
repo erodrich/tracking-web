@@ -22,12 +22,15 @@ class HttpRequestsController extends Controller
                 'timeout' => 2.0
             ]
         );
-        $response = $client->request('GET','locations/'.$imei.'/date/'.$date);
+        $response = $client->request('GET','locations/354987050678903/date/2018-03-02');
         $jsonFormat = json_decode($response->getBody());
         $locations = $jsonFormat->data;
         return $locations;
-        
+        //return $this->getCenter($locations);
+       
     }
+
+
 
     public function getLastLocation($imei)
     {

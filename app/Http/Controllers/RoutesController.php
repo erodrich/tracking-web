@@ -11,12 +11,14 @@ use App\Http\Controllers\HttpRequestsController;
 
 class RoutesController extends Controller
 {
-    protected $gmap;
+    //protected $gmap;
+    protected $mapController;
 
     public function __construct()
     {
         $this->middleware('auth');
         $this->gmap = new GMaps;
+        $this->mapController = new MapController;
     }
     
     public function route($id, $date)
@@ -33,16 +35,30 @@ class RoutesController extends Controller
         //Dibujar lineas de union entre ubicaciones
         $polyline['points'] = CustomMap::parseToPoints($locations);
         //Dibujar marcadores en el mapa para cada ubicacion
-        for($i = 0; $i < count($locations); $i++){
-            $markers[$i]['position'] = $locations[$i]->latitud.','.$locations[$i]->longitud;
-            $markers[$i]['infowindow_content'] = '<p>'.$locations[$i]->hora.'</p>';
-            $this->gmap->add_marker($markers[$i]);
+        if(count($locations) > 0){
+            for($i = 0; $i < count($locations); $i++){
+                if(!empty($locations[$i])){
+                    $markers[$i]['position'] = $locations[$i]->latitud.','.$locations[$i]->longitud;
+                    $markers[$i]['infowindow_content'] = '<ul>'
+                                                    .'<li>Fecha: '.$locations[$i]->fecha.'</li>'
+                                                    .'<li>Hora: '.$locations[$i]->hora.'</li>'
+                                                    .'</ul>';                                                        ;
+                    $this->mapController->add_marker($markers[$i]);
+                }
+            }
         }
 
-        $this->gmap->initialize(CustomMap::CONFIG);
-        $this->gmap->add_polyline($polyline);
+        $center = CustomMap::getCenter($locations);
+        $this->mapController->setConfig('center', $center);
+        //$this->mapController->setConfig('zoom', '');
+        $this->mapController->cInitialize();
+        $map = $this->mapController->create_map();
 
-        $map = $this->gmap->create_map();
+        // $this->gmap->initialize(CustomMap::CONFIG);
+        // $this->gmap->add_polyline($polyline);
+        // $map = $this->gmap->create_map();
+
+       
 
         $data['map'] = $map;
         $data['locations'] = $locations;
